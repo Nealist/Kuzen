@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SÜMOŞ - KRAL KUZEN</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            color: white;
+        }
+        #fireworks-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .letter {
+            display: inline-block;
+            opacity: 0;
+            font-size: 4.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0 4px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.5);
+        }
+        .firework-particle {
+            position: absolute;
+            border-radius: 50%;
+        }
+        .comment-bubble {
+            position: fixed;
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1.4em;
+            font-weight: 900;
+            box-shadow: 0 5px 20px rgba(255,215,0,0.4);
+            white-space: nowrap;
+            animation: fadeInOut 4s forwards;
+            z-index: 100;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+            15% { opacity: 1; transform: translateY(0) scale(1); }
+            85% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-20px) scale(0.8); }
+        }
+        #final-story-bubble {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            color: #FFD700;
+            padding: 25px;
+            border: 2px solid #FFD700;
+            border-radius: 20px;
+            font-size: 1.1em;
+            max-width: 320px;
+            text-align: center;
+            z-index: 200;
+            line-height: 1.6;
+            box-shadow: 0 0 30px rgba(255,215,0,0.5);
+        }
+        .golden-stream {
+            position: fixed;
+            background: radial-gradient(circle, #FFD700 0%, #FFA500 70%, transparent 100%);
+            opacity: 0;
+            width: 3px;
+            height: 50px;
+            border-radius: 2px;
+            animation: goldenStreamEffect 3s linear forwards;
+            z-index: 999;
+        }
+        @keyframes goldenStreamEffect {
+            0% { transform: translateY(-100px); opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        #touch-to-start-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <audio id="background-music" src="/storage/emulated/0/android/esoş/muzik.mp3" loop></audio>
+
+    <div id="touch-to-start-container">
+        <div style="font-size: 6em;">👑</div>
+        <div style="font-size: 1.5em; color: gold; font-weight: bold; margin-top: 20px;">KRAL KUZEN İÇİN TIKLA</div>
+    </div>
+    
+    <div id="fireworks-container"></div>
+    <div id="text-container">
+        <span class="letter">S</span><span class="letter">Ü</span><span class="letter">M</span><span class="letter">O</span><span class="letter">Ş</span>
+    </div>
+
+    <script>
+        const backgroundMusic = document.getElementById("background-music");
+        const touchContainer = document.getElementById("touch-to-start-container");
+        const letters = document.querySelectorAll(".letter");
+        const container = document.getElementById("fireworks-container");
+        let complimentIndex = 0;
+        let fireworkInterval;
+
+        const compliments = [
+            "Sen kuzenlerin bir tanesisin!",
+            "Kuzen bizi affeder yaa...",
+            "En kral kuzen Sümoş'tur!",
+            "O bir babadır bizim için!",
+            "Kusurumuza bakma canım kuzenim.",
+            "Sümoş, sen bizim her şeyimizsin!",
+            "Kuzenlerin şahı Sümoş!",
+            "İyi ki varsın Sümoş Reis!"
+        ];
+
+        function createExplosion(x, y) {
+            const color = ["#FFD700", "#FFF", "#FFA500"][Math.floor(Math.random()*3)];
+            for (let i = 0; i < 35; i++) {
+                const p = document.createElement("div");
+                p.className = "firework-particle";
+                p.style.width = p.style.height = (Math.random()*5+2)+"px";
+                p.style.backgroundColor = color;
+                p.style.left = x+"px"; p.style.top = y+"px";
+                container.appendChild(p);
+                const angle = Math.random()*Math.PI*2;
+                const dist = Math.random()*150;
+                p.animate([{transform:'translate(0,0)', opacity:1}, {transform:`translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`, opacity:0}], {duration:1500});
+                setTimeout(() => p.remove(), 1500);
+            }
+        }
+
+        async function startSequence() {
+            for (let l of letters) {
+                const r = l.getBoundingClientRect();
+                createExplosion(r.left + r.width/2, r.top + r.height/2);
+                l.style.opacity = 1;
+                await new Promise(res => setTimeout(res, 600));
+            }
+            fireworkInterval = setInterval(() => createExplosion(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 800);
+            
+            const commentInterval = setInterval(() => {
+                if (complimentIndex >= compliments.length) {
+                    clearInterval(commentInterval);
+                    setTimeout(showFinalStory, 2000);
+                    return;
+                }
+                const b = document.createElement("div");
+                b.className = "comment-bubble";
+                b.textContent = compliments[complimentIndex++];
+                document.body.appendChild(b);
+                b.style.left = (window.innerWidth/2 - b.offsetWidth/2)+"px";
+                b.style.top = (Math.random()*30+30)+"%";
+                setTimeout(() => b.remove(), 4000);
+            }, 3000);
+        }
+
+        function showFinalStory() {
+            const final = document.createElement("div");
+            final.id = "final-story-bubble";
+            final.innerHTML = `<b>BÜYÜK KUZEN SÜMOŞ</b><br><br>Bazı insanlar sadece akraba değil, sığınılacak bir limandır.<br>Sümoş bizim için bir kuzenden öte, adeta bir babadır.<br><br>Hatamız olduysa affola kuzen, yerin başımızın üstü.<br><b>Seni Çok Seviyoruz!</b>`;
+            document.body.appendChild(final);
+
+            // 10 saniye sonra her şeyi temizle ve altın yağmurunu başlat
+            setTimeout(() => {
+                final.remove();
+                document.getElementById("text-container").remove();
+                clearInterval(fireworkInterval);
+                startGoldenStream();
+            }, 10000);
+        }
+
+        function startGoldenStream() {
+            let count = 0;
+            const streamTimer = setInterval(() => {
+                const s = document.createElement("div");
+                s.className = "golden-stream";
+                s.style.left = Math.random() * window.innerWidth + "px";
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 3000);
+                count++;
+                if(count > 100) clearInterval(streamTimer); // 10 saniye civarı sürer
+            }, 100);
+        }
+
+        touchContainer.addEventListener("click", () => {
+            backgroundMusic.play().catch(()=>{});
+            touchContainer.style.display = "none";
+            startSequence();
+        });
+    </script>
+</body>
+</html>
